@@ -4,19 +4,23 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+  <!-- eureka服务拉起 -->
   <listener>
     <listener-class>com.netflix.eureka.EurekaBootStrap</listener-class>
   </listener>
 
+  <!-- 检测 eureka服务是否可堆外提供服务 -->
   <filter>
     <filter-name>statusFilter</filter-name>
     <filter-class>com.netflix.eureka.StatusFilter</filter-class>
   </filter>
 
+  <!-- 简单http head检查 -->
   <filter>
     <filter-name>requestAuthFilter</filter-name>
     <filter-class>com.netflix.eureka.ServerRequestAuthFilter</filter-class>
   </filter>
+  <!-- 限流 -->
   <filter>
     <filter-name>rateLimitingFilter</filter-name>
     <filter-class>com.netflix.eureka.RateLimitingFilter</filter-class>
@@ -26,6 +30,7 @@
     <filter-class>com.netflix.eureka.GzipEncodingEnforcingFilter</filter-class>
   </filter>
 
+  <!-- 类似 spring mvc dispatch：用于转接servlet请求到jersey框架 -->
   <filter>
     <filter-name>jersey</filter-name>
     <filter-class>com.sun.jersey.spi.container.servlet.ServletContainer</filter-class>

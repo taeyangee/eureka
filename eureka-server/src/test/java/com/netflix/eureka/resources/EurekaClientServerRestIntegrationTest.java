@@ -90,6 +90,8 @@ public class EurekaClientServerRestIntegrationTest {
                 serverCodecs,
                 eurekaServiceUrl
         );
+
+        Thread.sleep(Long.MAX_VALUE);
     }
 
     @AfterClass
@@ -231,48 +233,63 @@ public class EurekaClientServerRestIntegrationTest {
 
     }
 
+    // 原来的startServer使用war包启动，  这里改为使用source直接启动jetty
     private static void startServer() throws Exception {
-        File warFile = findWar();
-
         server = new Server(8080);
 
-        WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath("/");
-        webapp.setWar(warFile.getAbsolutePath());
-        server.setHandler(webapp);
-
+        WebAppContext webAppCtx = new WebAppContext(new File("./eureka-server/src/main/webapp").getAbsolutePath(), "/");
+        webAppCtx.setDescriptor(new File("./eureka-server/src/main/webapp/WEB-INF/web.xml").getAbsolutePath());
+        webAppCtx.setResourceBase(new File("./eureka-server/src/main/resources").getAbsolutePath());
+        webAppCtx.setClassLoader(Thread.currentThread().getContextClassLoader());
+        server.setHandler(webAppCtx);
         server.start();
 
         eurekaServiceUrl = "http://localhost:8080/v2";
     }
 
-    private static File findWar() {
-        File dir = null;
-        for (String candidate : EUREKA1_WAR_DIRS) {
-            File candidateFile = new File(candidate);
-            if (candidateFile.exists()) {
-                dir = candidateFile;
-                break;
-            }
-        }
-        if (dir == null) {
-            throw new IllegalStateException("No directory found at any in any pre-configured location: " + Arrays.toString(EUREKA1_WAR_DIRS));
-        }
 
-        File[] warFiles = dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return WAR_PATTERN.matcher(name).matches();
-            }
-        });
-        if (warFiles.length == 0) {
-            throw new IllegalStateException("War file not found in directory " + dir);
-        }
-        if (warFiles.length > 1) {
-            throw new IllegalStateException("Multiple war files found in directory " + dir + ": " + Arrays.toString(warFiles));
-        }
-        return warFiles[0];
-    }
+//    private static void startServer() throws Exception {
+//        File warFile = findWar();
+//
+//        server = new Server(8080);
+//
+//        WebAppContext webapp = new WebAppContext();
+//        webapp.setContextPath("/");
+//        webapp.setWar(warFile.getAbsolutePath());
+//        server.setHandler(webapp);
+//
+//        server.start();
+//
+//        eurekaServiceUrl = "http://localhost:8080/v2";
+//    }
+
+//    private static File findWar() {
+//        File dir = null;
+//        for (String candidate : EUREKA1_WAR_DIRS) {
+//            File candidateFile = new File(candidate);
+//            if (candidateFile.exists()) {
+//                dir = candidateFile;
+//                break;
+//            }
+//        }
+//        if (dir == null) {
+//            throw new IllegalStateException("No directory found at any in any pre-configured location: " + Arrays.toString(EUREKA1_WAR_DIRS));
+//        }
+//
+//        File[] warFiles = dir.listFiles(new FilenameFilter() {
+//            @Override
+//            public boolean accept(File dir, String name) {
+//                return WAR_PATTERN.matcher(name).matches();
+//            }
+//        });
+//        if (warFiles.length == 0) {
+//            throw new IllegalStateException("War file not found in directory " + dir);
+//        }
+//        if (warFiles.length > 1) {
+//            throw new IllegalStateException("Multiple war files found in directory " + dir + ": " + Arrays.toString(warFiles));
+//        }
+//        return warFiles[0];
+//    }
 
     private static void createEurekaServerConfig() {
         eurekaServerConfig = mock(EurekaServerConfig.class);

@@ -1,9 +1,10 @@
 apply plugin: 'war'
 
 dependencies {
-    compile project(':eureka-client')
-    compile project(':eureka-core')
+    compile project(':eureka-client') /* server本身也做为client*/
+    compile project(':eureka-core') /* eureka的核心功能*/
     runtime 'xerces:xercesImpl:2.4.0'
+    /* jersey rest ， 国内不常用 */
     compile "com.sun.jersey:jersey-server:$jerseyVersion"
     compile "com.sun.jersey:jersey-servlet:$jerseyVersion"
     compile 'org.slf4j:slf4j-log4j12:1.6.1'
@@ -12,6 +13,7 @@ dependencies {
 
     testCompile project(':eureka-test-utils')
     testCompile "org.mockito:mockito-core:${mockitoVersion}"
+    /* jetty 容器 */
     testCompile "org.eclipse.jetty:jetty-server:$jetty_version"
     testCompile "org.eclipse.jetty:jetty-webapp:$jetty_version"
 }
@@ -22,8 +24,8 @@ task copyLibs(type: Copy) {
 }
 
 war {
-    from (project(':eureka-resources').file('build/resources/main'))
+    from (project(':eureka-resources').file('build/resources/main')) /* 从eureka-resources抓取前端资源  */
 }
 
 // Integration test loads eureka war, so it must be ready prior to running tests
-test.dependsOn war
+test.dependsOn war /* 达成war包，EurekaClientServerRestIntegrationTest再启动这个war包 */
