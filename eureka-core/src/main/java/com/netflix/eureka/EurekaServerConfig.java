@@ -23,7 +23,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Configuration information required by the eureka server to operate.
+ * EurekaServerConfig： Configuration information required by the eureka server to operate.
+ *
+ * - 请求认证相关
+ * - 请求限流相关
+ * - 获取注册信息请求相关:详见应用实例注册流程
+ * - 自我保护机制相关
+ * - 注册的应用实例的租约过期相关
+ * - Eureka-Server 远程节点( 非集群 )读取相关
+ * - Eureka-Server 集群同步相关
  *
  * <p>
  * Most of the required information is provided by the default configuration

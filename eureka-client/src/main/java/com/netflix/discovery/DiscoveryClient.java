@@ -60,6 +60,10 @@ import static com.netflix.discovery.EurekaClientNames.METRIC_REGISTRY_PREFIX;
 
 /**
  * The class that is instrumental for interactions with <tt>Eureka Server</tt>.
+ * a) 注册实例到 Eureka Server
+ * b) 和Eureka Server 续约
+ * c) 和Eureka Server 解约
+ * d) 向Eureka Server 请求查询信息
  *
  * <p>
  * <tt>Eureka Client</tt> is responsible for a) <em>Registering</em> the
@@ -121,7 +125,8 @@ public class DiscoveryClient implements EurekaClient {
      */
     private final ThreadPoolExecutor heartbeatExecutor;
     /**
-     * {@link #localRegionApps} 刷新执行器
+     * {@link #localRegionApps}
+     * 刷新执行器
      */
     private final ThreadPoolExecutor cacheRefreshExecutor;
 
@@ -328,6 +333,7 @@ public class DiscoveryClient implements EurekaClient {
         });
     }
 
+    /* DiscoveryClient 初始化入口 */
     @Inject
     DiscoveryClient(ApplicationInfoManager applicationInfoManager, EurekaClientConfig config, AbstractDiscoveryClientOptionalArgs args,
                     Provider<BackupRegistry> backupRegistryProvider) {
@@ -439,7 +445,7 @@ public class DiscoveryClient implements EurekaClient {
             eurekaTransport = new EurekaTransport();
             scheduleServerEndpointTask(eurekaTransport, args);
 
-            // 【3.2.11】初始化 InstanceRegionChecker
+            // 【3.2.11】初始化 InstanceRegionChecker TODo:InstanceRegion是什么概念
             AzToRegionMapper azToRegionMapper;
             if (clientConfig.shouldUseDnsForFetchingServiceUrls()) {
                 azToRegionMapper = new DNSBasedAzToRegionMapper(clientConfig);
@@ -1291,7 +1297,7 @@ public class DiscoveryClient implements EurekaClient {
      */
     private void initScheduledTasks() {
         // 从 Eureka-Server 拉取注册信息执行器
-        if (clientConfig.shouldFetchRegistry()) {
+        if (clientConfig.shouldFetchRegistry()) { /* 如果关注server上的注册表信息 */
             // registry cache refresh timer
             int registryFetchIntervalSeconds = clientConfig.getRegistryFetchIntervalSeconds();
             int expBackOffBound = clientConfig.getCacheRefreshExecutorExponentialBackOffBound();

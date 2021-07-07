@@ -73,6 +73,7 @@ import java.util.*;
  *
  * @author Karthik Ranganathan, Greg Kim
  *
+ * 集群可感知的 实例注册表：即在操作实例i会将实例注册表上操作，通知给peer eurekaserver
  */
 @Singleton
 public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry implements PeerAwareInstanceRegistry {

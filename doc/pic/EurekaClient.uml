@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.netflix.discovery.EurekaClient</OriginalElement>
+  <nodes>
+    <node x="98.0" y="0.0">com.netflix.discovery.shared.LookupService</node>
+    <node x="12.0" y="80.0">com.netflix.discovery.EurekaClient</node>
+    <node x="0.0" y="160.0">com.netflix.discovery.DiscoveryClient</node>
+    <node x="176.0" y="80.0">com.netflix.eureka.registry.InstanceRegistry</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.netflix.discovery.EurekaClient" target="com.netflix.discovery.shared.LookupService">
+      <point x="0.0" y="-15.0" />
+      <point x="84.0" y="55.0" />
+      <point x="136.0" y="55.0" />
+      <point x="-38.0" y="15.0" />
+    </edge>
+    <edge source="com.netflix.eureka.registry.InstanceRegistry" target="com.netflix.discovery.shared.LookupService">
+      <point x="0.0" y="-15.0" />
+      <point x="264.0" y="55.0" />
+      <point x="212.0" y="55.0" />
+      <point x="38.0" y="15.0" />
+    </edge>
+    <edge source="com.netflix.discovery.DiscoveryClient" target="com.netflix.discovery.EurekaClient">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="100.0" y="256.5" />
+  <SelectedNodes>
+    <node>com.netflix.eureka.registry.InstanceRegistry</node>
+  </SelectedNodes>
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

@@ -31,6 +31,9 @@ import java.util.*;
  * A default implementation of eureka server configuration as required by
  * {@link EurekaServerConfig}.
  *
+ * - 默认读取eureka-server.properties
+ * - 基于配置文件的EurekaServerConfig实现
+ *
  * <p>
  * The information required for configuring eureka server is provided in a
  * configuration file.The configuration file is searched for in the classpath

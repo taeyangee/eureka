@@ -19,6 +19,10 @@ package com.netflix.eureka.lease;
 import com.netflix.eureka.registry.AbstractInstanceRegistry;
 
 /**
+ * 租约管理：每个应用实例都有租约的概念，LeaseManager负责租约的创建、取消
+ * TODO: 租约，到底租了什么？
+ *
+ *
  * This class is responsible for creating/renewing and evicting a <em>lease</em>
  * for a particular instance.
  *
