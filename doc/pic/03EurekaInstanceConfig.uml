@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.netflix.appinfo.MyDataCenterInstanceConfig</OriginalElement>
+  <nodes>
+    <node x="53.52380952380952" y="160.0">com.netflix.appinfo.PropertiesInstanceConfig</node>
+    <node x="130.1071428571429" y="0.0">com.netflix.appinfo.EurekaInstanceConfig</node>
+    <node x="112.02380952380952" y="240.0">com.netflix.appinfo.MyDataCenterInstanceConfig</node>
+    <node x="0.0" y="80.0">com.netflix.appinfo.AbstractInstanceConfig</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.netflix.appinfo.MyDataCenterInstanceConfig" target="com.netflix.appinfo.EurekaInstanceConfig">
+      <point x="64.0" y="-15.0" />
+      <point x="69.33333333333331" y="15.0" />
+    </edge>
+    <edge source="com.netflix.appinfo.PropertiesInstanceConfig" target="com.netflix.appinfo.AbstractInstanceConfig">
+      <point x="-60.0" y="-15.0" />
+      <point x="113.52380952380952" y="135.0" />
+      <point x="112.0" y="135.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.netflix.appinfo.AbstractInstanceConfig" target="com.netflix.appinfo.EurekaInstanceConfig">
+      <point x="0.0" y="-15.0" />
+      <point x="112.0" y="55.0" />
+      <point x="164.77380952380958" y="55.0" />
+      <point x="-69.33333333333331" y="15.0" />
+    </edge>
+    <edge source="com.netflix.appinfo.PropertiesInstanceConfig" target="com.netflix.appinfo.EurekaInstanceConfig">
+      <point x="60.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.netflix.appinfo.MyDataCenterInstanceConfig" target="com.netflix.appinfo.PropertiesInstanceConfig">
+      <point x="-64.0" y="-15.0" />
+      <point x="176.02380952380952" y="215.0" />
+      <point x="173.52380952380952" y="215.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="184.5" y="135.0" />
+  <SelectedNodes>
+    <node>com.netflix.appinfo.MyDataCenterInstanceConfig</node>
+  </SelectedNodes>
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
