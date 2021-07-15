@@ -186,7 +186,7 @@ public abstract class AbstractJerseyEurekaHttpClient implements EurekaHttpClient
         ClientResponse response = null;
         String regionsParamValue = null;
         try {
-            WebResource webResource = jerseyClient.resource(serviceUrl).path(urlPath);
+            WebResource webResource = jerseyClient.resource(serviceUrl).path(urlPath); /* http://localhost:8080/eureka/apps/ */
             if (regions != null && regions.length > 0) {
                 regionsParamValue = StringUtil.join(regions);
                 webResource = webResource.queryParam("regions", regionsParamValue);

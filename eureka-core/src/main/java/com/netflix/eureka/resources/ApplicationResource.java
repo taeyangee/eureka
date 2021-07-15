@@ -129,7 +129,7 @@ public class ApplicationResource {
     public InstanceResource getInstanceInfo(@PathParam("id") String id) {
         return new InstanceResource(this, id, serverConfig, registry);
     }
-
+    /* client 注册逻辑入口 */
     /**
      * Registers information about a particular instance for an
      * {@link com.netflix.discovery.shared.Application}.
@@ -183,7 +183,7 @@ public class ApplicationResource {
             }
         }
 
-        registry.register(info, "true".equals(isReplication));
+        registry.register(info, "true".equals(isReplication)); /*S*/
         return Response.status(204).build();  // 204 to be backwards compatible
     }
 

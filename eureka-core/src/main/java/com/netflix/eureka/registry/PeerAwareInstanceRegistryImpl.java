@@ -396,7 +396,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
      */
     @Override
     public void register(final InstanceInfo info, final boolean isReplication) {
-        int leaseDuration = Lease.DEFAULT_DURATION_IN_SECS;
+        int leaseDuration = Lease.DEFAULT_DURATION_IN_SECS; /* 租期保活 90s */
         if (info.getLeaseInfo() != null && info.getLeaseInfo().getDurationInSecs() > 0) {
             leaseDuration = info.getLeaseInfo().getDurationInSecs();
         }

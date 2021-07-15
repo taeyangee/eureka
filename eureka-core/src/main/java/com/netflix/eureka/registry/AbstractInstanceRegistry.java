@@ -88,7 +88,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
     // CircularQueues here for debugging/statistics purposes only
     private final CircularQueue<Pair<Long, String>> recentRegisteredQueue;
     private final CircularQueue<Pair<Long, String>> recentCanceledQueue;
-    private ConcurrentLinkedQueue<RecentlyChangedItem> recentlyChangedQueue = new ConcurrentLinkedQueue<RecentlyChangedItem>();
+    private ConcurrentLinkedQueue<RecentlyChangedItem> recentlyChangedQueue = new ConcurrentLinkedQueue<RecentlyChangedItem>(); /* 最近变动过的实例: 当应用实例注册、下线、状态变更时，创建最近租约变更记录( RecentlyChangedItem ) 到队列。*/
 
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final Lock read = readWriteLock.readLock();
@@ -217,7 +217,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                     logger.warn("Using the existing instanceInfo instead of the new instanceInfo as the registrant");
                     registrant = existingLease.getHolder();
                 }
-            } else {
+            } else { /* client首次注册， 走该分支 */
                 // The lease does not exist and hence it is a new registration
                 synchronized (lock) {
                     if (this.expectedNumberOfClientsSendingRenews > 0) {
@@ -228,14 +228,14 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                 }
                 logger.debug("No previous lease information found; it is new registration");
             }
-            Lease<InstanceInfo> lease = new Lease<InstanceInfo>(registrant, leaseDuration);
+            Lease<InstanceInfo> lease = new Lease<InstanceInfo>(registrant, leaseDuration); /* 构造新租约 */
             if (existingLease != null) {
-                lease.setServiceUpTimestamp(existingLease.getServiceUpTimestamp());
+                lease.setServiceUpTimestamp(existingLease.getServiceUpTimestamp()); /* 从旧租约copy实例的启动时间*/
             }
             gMap.put(registrant.getId(), lease);
             recentRegisteredQueue.add(new Pair<Long, String>(
                     System.currentTimeMillis(),
-                    registrant.getAppName() + "(" + registrant.getId() + ")"));
+                    registrant.getAppName() + "(" + registrant.getId() + ")")); /* <变动时间，服务名+实例号，比如：EK-CLIENT(DESKTOP-R64VOMC:ek-client:8083)>*/
             // This is where the initial state transfer of overridden status happens
             if (!InstanceStatus.UNKNOWN.equals(registrant.getOverriddenStatus())) {
                 logger.debug("Found overridden status {} for instance {}. Checking to see if needs to be add to the "
@@ -257,12 +257,12 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
 
             // If the lease is registered with UP status, set lease service up timestamp
             if (InstanceStatus.UP.equals(registrant.getStatus())) {
-                lease.serviceUp();
+                lease.serviceUp(); /* 登记启机时间， 首次启动时才登记 */
             }
             registrant.setActionType(ActionType.ADDED);
-            recentlyChangedQueue.add(new RecentlyChangedItem(lease));
+            recentlyChangedQueue.add(new RecentlyChangedItem(lease)); /* 注册时，记录*/
             registrant.setLastUpdatedTimestamp();
-            invalidateCache(registrant.getAppName(), registrant.getVIPAddress(), registrant.getSecureVipAddress());
+            invalidateCache(registrant.getAppName(), registrant.getVIPAddress(), registrant.getSecureVipAddress()); /* vipaddress就是appname */    /* 缓存：失效对应实例*/
             logger.info("Registered instance {}/{} with status {} (replication={})",
                     registrant.getAppName(), registrant.getId(), registrant.getStatus(), isReplication);
         } finally {
@@ -319,7 +319,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                 String svip = null;
                 if (instanceInfo != null) {
                     instanceInfo.setActionType(ActionType.DELETED);
-                    recentlyChangedQueue.add(new RecentlyChangedItem(leaseToCancel));
+                    recentlyChangedQueue.add(new RecentlyChangedItem(leaseToCancel)); /* 取消时，记录*/
                     instanceInfo.setLastUpdatedTimestamp();
                     vip = instanceInfo.getVIPAddress();
                     svip = instanceInfo.getSecureVipAddress();
@@ -501,7 +501,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                         info.setLastDirtyTimestamp(replicaDirtyTimestamp);
                     }
                     info.setActionType(ActionType.MODIFIED);
-                    recentlyChangedQueue.add(new RecentlyChangedItem(lease));
+                    recentlyChangedQueue.add(new RecentlyChangedItem(lease)); /* 状态更新时，记录*/
                     info.setLastUpdatedTimestamp();
                     invalidateCache(appName, info.getVIPAddress(), info.getSecureVipAddress());
                 }
@@ -562,7 +562,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                         info.setLastDirtyTimestamp(replicaDirtyTimestamp);
                     }
                     info.setActionType(ActionType.MODIFIED);
-                    recentlyChangedQueue.add(new RecentlyChangedItem(lease));
+                    recentlyChangedQueue.add(new RecentlyChangedItem(lease)); /* 删除时，记录*/
                     info.setLastUpdatedTimestamp();
                     invalidateCache(appName, info.getVIPAddress(), info.getSecureVipAddress());
                 }
@@ -856,7 +856,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
         return apps;
     }
 
-    /**
+    /** 根据recentlyChangedQueue构建增量注册信息
      * Get the registry information about the delta changes. The deltas are
      * cached for a window specified by
      * {@link EurekaServerConfig#getRetentionTimeInMSInDeltaQueue()}. Subsequent
@@ -920,7 +920,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
         }
     }
 
-    /**
+    /** 构建 增量注册信息
      * Gets the application delta also including instances from the passed remote regions, with the instances from the
      * local region. <br/>
      *
@@ -938,7 +938,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
      * from remote regions can be further be restricted as explained above. <code>null</code> if the application does
      * not exist locally or in remote regions.
      */
-    public Applications getApplicationDeltasFromMultipleRegions(String[] remoteRegions) {
+    public Applications getApplicationDeltasFromMultipleRegions(String[] remoteRegions) { /* remoteRegions常规为null */
         if (null == remoteRegions) {
             remoteRegions = allKnownRemoteRegions; // null means all remote regions.
         }
@@ -951,7 +951,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
             GET_ALL_CACHE_MISS_DELTA.increment();
         }
 
-        Applications apps = new Applications();
+        Applications apps = new Applications(); /* 构造Applications做为返回主体 */
         apps.setVersion(responseCache.getVersionDeltaWithRegions().get());
         Map<String, Application> applicationInstancesMap = new HashMap<String, Application>();
         try {
@@ -967,7 +967,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                 if (app == null) {
                     app = new Application(instanceInfo.getAppName());
                     applicationInstancesMap.put(instanceInfo.getAppName(), app);
-                    apps.addApplication(app);
+                    apps.addApplication(app); /* recentlyChangedQueue for一下，每次一个app,添加到apps */
                 }
                 app.addInstance(new InstanceInfo(decorateInstanceInfo(lease)));
             }
@@ -997,7 +997,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
             }
 
             Applications allApps = getApplicationsFromMultipleRegions(remoteRegions);
-            apps.setAppsHashCode(allApps.getReconcileHashCode());
+            apps.setAppsHashCode(allApps.getReconcileHashCode()); /* 全量注册信息的hashcode，也一起返回， 给client做diff校验 */
             return apps;
         } finally {
             write.unlock();

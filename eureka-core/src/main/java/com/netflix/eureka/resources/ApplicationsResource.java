@@ -53,7 +53,7 @@ import com.netflix.eureka.util.EurekaMonitors;
  */
 @Path("/{version}/apps")
 @Produces({"application/xml", "application/json"})
-public class ApplicationsResource {
+    public class ApplicationsResource {
     private static final String HEADER_ACCEPT = "Accept";
     private static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
     private static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
@@ -99,7 +99,7 @@ public class ApplicationsResource {
     }
 
     /**
-     * Get information about all {@link com.netflix.discovery.shared.Applications}.
+     * Get information about all {@link com.netflix.discovery.shared.Applications}. 全量拉取注册信息
      *
      * @param version the version of the request.
      * @param acceptHeader the accept header to indicate whether to serve JSON or XML data.
@@ -148,7 +148,7 @@ public class ApplicationsResource {
         Key cacheKey = new Key(Key.EntityType.Application,
                 ResponseCacheImpl.ALL_APPS,
                 keyType, CurrentRequestVersion.get(), EurekaAccept.fromString(eurekaAccept), regions
-        );
+        ); /* 创建key */
 
         Response response;
         if (acceptEncoding != null && acceptEncoding.contains(HEADER_GZIP_VALUE)) {
@@ -166,7 +166,7 @@ public class ApplicationsResource {
 
     /**
      * Get information about all delta changes in {@link com.netflix.discovery.shared.Applications}.
-     *
+     * 增量拉取注册信息： 留存在队列中的近期变动注册信息（留存周期：retentionTimeInMSInDeltaQueue）
      * <p>
      * The delta changes represent the registry information change for a period
      * as configured by
@@ -229,12 +229,12 @@ public class ApplicationsResource {
         Key cacheKey = new Key(Key.EntityType.Application,
                 ResponseCacheImpl.ALL_APPS_DELTA,
                 keyType, CurrentRequestVersion.get(), EurekaAccept.fromString(eurekaAccept), regions
-        );
+        ); /* cachekey形如： Application/ALL_APPS_DELTA/JSON/V2/full */
 
         final Response response;
 
         if (acceptEncoding != null && acceptEncoding.contains(HEADER_GZIP_VALUE)) {
-             response = Response.ok(responseCache.getGZIP(cacheKey))
+             response = Response.ok(responseCache.getGZIP(cacheKey)) /* 走缓存 拉取增量注册信息*/
                     .header(HEADER_CONTENT_ENCODING, HEADER_GZIP_VALUE)
                     .header(HEADER_CONTENT_TYPE, returnMediaType)
                     .build();
