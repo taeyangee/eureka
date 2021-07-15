@@ -112,9 +112,9 @@ public class ResponseCacheImpl implements ResponseCache {
                 }
             });
 
-    private final ConcurrentMap<Key, Value> readOnlyCacheMap = new ConcurrentHashMap<Key, Value>();
+    private final ConcurrentMap<Key, Value> readOnlyCacheMap = new ConcurrentHashMap<Key, Value>(); /* RW： 有被动定时过期 */
 
-    private final LoadingCache<Key, Value> readWriteCacheMap;
+    private final LoadingCache<Key, Value> readWriteCacheMap; /* RW: 有主动过期、定时过期 */
     private final boolean shouldUseReadOnlyResponseCache;
     private final AbstractInstanceRegistry registry;
     private final EurekaServerConfig serverConfig;
@@ -129,7 +129,7 @@ public class ResponseCacheImpl implements ResponseCache {
         long responseCacheUpdateIntervalMs = serverConfig.getResponseCacheUpdateIntervalMs();
         this.readWriteCacheMap =
                 CacheBuilder.newBuilder().initialCapacity(serverConfig.getInitialCapacityOfResponseCache())
-                        .expireAfterWrite(serverConfig.getResponseCacheAutoExpirationInSeconds(), TimeUnit.SECONDS)
+                        .expireAfterWrite(serverConfig.getResponseCacheAutoExpirationInSeconds(), TimeUnit.SECONDS) /* 主动过期：responseCacheAutoExpirationInSeconds, 默认180s */
                         .removalListener(new RemovalListener<Key, Value>() {
                             @Override
                             public void onRemoval(RemovalNotification<Key, Value> notification) {
@@ -166,7 +166,7 @@ public class ResponseCacheImpl implements ResponseCache {
         }
     }
 
-    private TimerTask getCacheUpdateTask() {
+    private TimerTask getCacheUpdateTask() { /* 逐个key对比RW和RO， 以RW为准，set RO */
         return new TimerTask() {
             @Override
             public void run() {
@@ -243,7 +243,7 @@ public class ResponseCacheImpl implements ResponseCache {
     }
 
     /**
-     * Invalidate the cache of a particular application.
+     * Invalidate the cache of a particular application.  调用这个方法
      *
      * @param appName the application name of the application.
      */
