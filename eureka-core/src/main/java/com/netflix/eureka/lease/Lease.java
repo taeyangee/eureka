@@ -43,7 +43,7 @@ public class Lease<T> {
     private long registrationTimestamp;
     private long serviceUpTimestamp;
     // Make it volatile so that the expiration task would see this quicker
-    private volatile long lastUpdateTimestamp;
+    private volatile long lastUpdateTimestamp; /* volatile , 为了让expiration task就快感知 */
     private long duration;
 
     public Lease(T r, int durationInSecs) {
@@ -103,12 +103,12 @@ public class Lease<T> {
      * Note that due to renew() doing the 'wrong" thing and setting lastUpdateTimestamp to +duration more than
      * what it should be, the expiry will actually be 2 * duration. This is a minor bug and should only affect
      * instances that ungracefully shutdown. Due to possible wide ranging impact to existing usage, this will
-     * not be fixed.
+     * not be fixed.  因为renew方法实现错了，但是并没有修复，过期判定实际变成了2倍租期，正确的设置应该是 lastUpdateTimestamp = System.currentTimeMillis() , 但却错误实现为 lastUpdateTimestamp = System.currentTimeMillis() + duration
      *
      * @param additionalLeaseMs any additional lease time to add to the lease evaluation in ms.
      */
     public boolean isExpired(long additionalLeaseMs) {
-        return (evictionTimestamp > 0 || System.currentTimeMillis() > (lastUpdateTimestamp + duration + additionalLeaseMs));
+        return (evictionTimestamp > 0 || System.currentTimeMillis() > (lastUpdateTimestamp + duration + additionalLeaseMs)); /* 主动下线过 || 当期时间 > （上次租约的更新时间 + 租约有效期 + 补偿时间） */
     }
 
     /**

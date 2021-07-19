@@ -113,7 +113,7 @@ public abstract class AbstractJersey2EurekaHttpClient implements EurekaHttpClien
             Builder resourceBuilder = jerseyClient.target(serviceUrl).path(urlPath).request();
             addExtraProperties(resourceBuilder);
             addExtraHeaders(resourceBuilder);
-            response = resourceBuilder.delete();
+            response = resourceBuilder.delete(); /* delete http:/server/apps/appname/实例id */
             return anEurekaHttpResponse(response.getStatus()).headers(headersOf(response)).build();
         } finally {
             if (logger.isDebugEnabled()) {

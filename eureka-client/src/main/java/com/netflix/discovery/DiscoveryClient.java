@@ -147,7 +147,7 @@ public class DiscoveryClient implements EurekaClient {
     private final ThreadPoolExecutor cacheRefreshExecutor; /* 被cacheRefreshTask持有：负责task的定时、逐一执行 */
 
     private TimedSupervisorTask cacheRefreshTask; /* 定时任务：刷新本地注册表 （从server端同步）*/
-    private TimedSupervisorTask heartbeatTask;
+    private TimedSupervisorTask heartbeatTask; /* 定时任务： 发送实例心跳*/
 
     private final Provider<HealthCheckHandler> healthCheckHandlerProvider;
     private final Provider<HealthCheckCallback> healthCheckCallbackProvider;
@@ -179,7 +179,7 @@ public class DiscoveryClient implements EurekaClient {
 
     private volatile int registrySize = 0; /* 注册信息的应用实例数*/
     private volatile long lastSuccessfulRegistryFetchTimestamp = -1; /* 最后获取注册信息时间 */
-    private volatile long lastSuccessfulHeartbeatTimestamp = -1;
+    private volatile long lastSuccessfulHeartbeatTimestamp = -1; /* 最后成功发送心跳的时间 */
     private final ThresholdLevelsMetric heartbeatStalenessMonitor;
     private final ThresholdLevelsMetric registryStalenessMonitor;
 
@@ -887,13 +887,13 @@ public class DiscoveryClient implements EurekaClient {
     boolean renew() {
         EurekaHttpResponse<InstanceInfo> httpResponse;
         try {
-            httpResponse = eurekaTransport.registrationClient.sendHeartBeat(instanceInfo.getAppName(), instanceInfo.getId(), instanceInfo, null);
+            httpResponse = eurekaTransport.registrationClient.sendHeartBeat(instanceInfo.getAppName(), instanceInfo.getId(), instanceInfo, null); /* 发送http请求*/
             logger.debug(PREFIX + "{} - Heartbeat status: {}", appPathIdentifier, httpResponse.getStatusCode());
-            if (httpResponse.getStatusCode() == Status.NOT_FOUND.getStatusCode()) {
+            if (httpResponse.getStatusCode() == Status.NOT_FOUND.getStatusCode()) { /* server端回复：找不到实例 */
                 REREGISTER_COUNTER.increment();
                 logger.info(PREFIX + "{} - Re-registering apps/{}", appPathIdentifier, instanceInfo.getAppName());
                 long timestamp = instanceInfo.setIsDirtyWithTime();
-                boolean success = register();
+                boolean success = register(); /* 走注册逻辑 */
                 if (success) {
                     instanceInfo.unsetIsDirty(timestamp);
                 }
@@ -923,33 +923,33 @@ public class DiscoveryClient implements EurekaClient {
 
     /**
      * Shuts down Eureka Client. Also sends a deregistration request to the
-     * eureka server.
+     * eureka server.  整个流程可以对照初始化看看
      */
     @PreDestroy
     @Override
     public synchronized void shutdown() {
-        if (isShutdown.compareAndSet(false, true)) {
+        if (isShutdown.compareAndSet(false, true)) { /* 并发： 防止重入 */
             logger.info("Shutting down DiscoveryClient ...");
 
-            if (statusChangeListener != null && applicationInfoManager != null) {
+            if (statusChangeListener != null && applicationInfoManager != null) { /* 取消 状态监听 */
                 applicationInfoManager.unregisterStatusChangeListener(statusChangeListener.getId());
             }
 
-            cancelScheduledTasks();
+            cancelScheduledTasks(); /* 取消 各种定时器*/
 
             // If APPINFO was registered
             if (applicationInfoManager != null
                     && clientConfig.shouldRegisterWithEureka()
                     && clientConfig.shouldUnregisterOnShutdown()) {
-                applicationInfoManager.setInstanceStatus(InstanceStatus.DOWN);
-                unregister();
+                applicationInfoManager.setInstanceStatus(InstanceStatus.DOWN); /* 服务实例 状态设置为 DOWN */
+                unregister(); /* 像server发送注销请求 */
             }
 
             if (eurekaTransport != null) {
-                eurekaTransport.shutdown();
+                eurekaTransport.shutdown(); /* 关闭通信组件 */
             }
 
-            heartbeatStalenessMonitor.shutdown();
+            heartbeatStalenessMonitor.shutdown(); /* 两个metric监控？ */
             registryStalenessMonitor.shutdown();
 
             Monitors.unregisterObject(this);
@@ -966,7 +966,7 @@ public class DiscoveryClient implements EurekaClient {
         if(eurekaTransport != null && eurekaTransport.registrationClient != null) {
             try {
                 logger.info("Unregistering ...");
-                EurekaHttpResponse<Void> httpResponse = eurekaTransport.registrationClient.cancel(instanceInfo.getAppName(), instanceInfo.getId());
+                EurekaHttpResponse<Void> httpResponse = eurekaTransport.registrationClient.cancel(instanceInfo.getAppName(), instanceInfo.getId()); /* http 调用*/
                 logger.info(PREFIX + "{} - deregister  status: {}", appPathIdentifier, httpResponse.getStatusCode());
             } catch (Exception e) {
                 logger.error(PREFIX + "{} - de-registration failed{}", appPathIdentifier, e.getMessage(), e);

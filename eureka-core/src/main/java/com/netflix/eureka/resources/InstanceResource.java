@@ -203,7 +203,7 @@ public class InstanceResource {
             @QueryParam("value") String newStatusValue,
             @QueryParam("lastDirtyTimestamp") String lastDirtyTimestamp) {
         try {
-            if (registry.getInstanceByAppAndId(app.getName(), id) == null) {
+            if (registry.getInstanceByAppAndId(app.getName(), id) == null) { /* 找不到实例，返回*/
                 logger.warn("Instance not found: {}/{}", app.getName(), id);
                 return Response.status(Status.NOT_FOUND).build();
             }
@@ -265,7 +265,7 @@ public class InstanceResource {
 
     }
 
-    /**
+    /**  实例主动下线
      * Handles cancellation of leases for this particular instance.
      *
      * @param isReplication

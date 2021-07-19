@@ -150,7 +150,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
         this.numberOfReplicationsLastMin.start();
         this.peerEurekaNodes = peerEurekaNodes;
         initializedResponseCache();
-        scheduleRenewalThresholdUpdateTask();
+        scheduleRenewalThresholdUpdateTask(); /* 定时器：定时刷新 注册表的心跳期望值 */
         initRemoteRegionRegistry();
 
         try {
@@ -237,7 +237,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     @Override
     public void openForTraffic(ApplicationInfoManager applicationInfoManager, int count) {
         // Renewals happen every 30 seconds and for a minute it should be a factor of 2.
-        this.expectedNumberOfClientsSendingRenews = count;
+        this.expectedNumberOfClientsSendingRenews = count; /* 初始化时， 配置expectedNumberOfClientsSendingRenews */
         updateRenewsPerMinThreshold();
         logger.info("Got {} instances from neighboring DS node", count);
         logger.info("Renew threshold is: {}", numberOfRenewsPerMinThreshold);
@@ -471,7 +471,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
 
     @Override
     public boolean isLeaseExpirationEnabled() {
-        if (!isSelfPreservationModeEnabled()) {
+        if (!isSelfPreservationModeEnabled()) { /* 是否开启保护配置 */
             // The self preservation mode is disabled, hence allowing the instances to expire.
             return true;
         }
@@ -527,7 +527,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
                 // current expected threshold or if self preservation is disabled.
                 if ((count) > (serverConfig.getRenewalPercentThreshold() * expectedNumberOfClientsSendingRenews)
                         || (!this.isSelfPreservationModeEnabled())) {
-                    this.expectedNumberOfClientsSendingRenews = count;
+                    this.expectedNumberOfClientsSendingRenews = count; /* 定时15min， 根据实际的实例数量，设置expectedNumberOfClientsSendingRenews */
                     updateRenewsPerMinThreshold();
                 }
             }

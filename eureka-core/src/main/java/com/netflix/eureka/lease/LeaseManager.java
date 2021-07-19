@@ -55,7 +55,7 @@ public interface LeaseManager<T> {
      * @param id
      *            - unique id within appName.
      * @param isReplication
-     *            - whether this is a replicated entry from another eureka node.
+     *            - whether this is a replicated entry from another eureka node.  即，请求是否由集群server节点发起（集群发起的请求，不做传播动作，避免请求风暴）
      * @return true, if the operation was successful, false otherwise.
      */
     boolean cancel(String appName, String id, boolean isReplication);
