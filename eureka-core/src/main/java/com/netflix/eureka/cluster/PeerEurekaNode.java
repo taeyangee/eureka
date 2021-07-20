@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * The <code>PeerEurekaNode</code> represents a peer node to which information
  * should be shared from this node.
  *
- * <p>
+ * <p> 负责将本地server接收到 注册、续约、下线、过钱、状态变更 都通给 一个特定的集群节点
  * This class handles replicating all update operations like
  * <em>Register,Renew,Cancel,Expiration and Status Changes</em> to the eureka
  * node it represents.
@@ -73,15 +73,15 @@ public class PeerEurekaNode {
 
     public static final String HEADER_REPLICATION = "x-netflix-discovery-replication";
 
-    private final String serviceUrl;
+    private final String serviceUrl; /* 实例url */
     private final EurekaServerConfig config;
     private final long maxProcessingDelayMs;
     private final PeerAwareInstanceRegistry registry;
-    private final String targetHost;
-    private final HttpReplicationClient replicationClient;
+    private final String targetHost; /* 解析后的 实例url*/
+    private final HttpReplicationClient replicationClient; /* 负责该targetHost的http client */
 
-    private final TaskDispatcher<String, ReplicationTask> batchingDispatcher;
-    private final TaskDispatcher<String, ReplicationTask> nonBatchingDispatcher;
+    private final TaskDispatcher<String, ReplicationTask> batchingDispatcher; /* 设计：请求批量发送 */
+    private final TaskDispatcher<String, ReplicationTask> nonBatchingDispatcher; /* 请求单发*/
 
     public PeerEurekaNode(PeerAwareInstanceRegistry registry, String targetHost, String serviceUrl, HttpReplicationClient replicationClient, EurekaServerConfig config) {
         this(registry, targetHost, serviceUrl, replicationClient, config, BATCH_SIZE, MAX_BATCHING_DELAY_MS, RETRY_SLEEP_TIME_MS, SERVER_UNAVAILABLE_SLEEP_TIME_MS);
@@ -91,8 +91,8 @@ public class PeerEurekaNode {
                                      HttpReplicationClient replicationClient, EurekaServerConfig config,
                                      int batchSize, long maxBatchingDelayMs,
                                      long retrySleepTimeMs, long serverUnavailableSleepTimeMs) {
-        this.registry = registry;
-        this.targetHost = targetHost;
+        this.registry = registry; /* 本地注册表 */
+        this.targetHost = targetHost; /* */
         this.replicationClient = replicationClient;
 
         this.serviceUrl = serviceUrl;
@@ -134,13 +134,13 @@ public class PeerEurekaNode {
     public void register(final InstanceInfo info) throws Exception {
         long expiryTime = System.currentTimeMillis() + getLeaseRenewalOf(info);
         batchingDispatcher.process(
-                taskId("register", info),
+                taskId("register", info), /* 相同实例的相同类型操作使用相同任务编号 ： requestType + '#' + appName + '/' + id;  ====> register#EK-CLIENT/DESKTOP-R64VOMC:ek-client:8082*/
                 new InstanceReplicationTask(targetHost, Action.Register, info, null, true) {
                     public EurekaHttpResponse<Void> execute() {
-                        return replicationClient.register(info);
+                        return replicationClient.register(info); /* 任务框架的回调： 向peer发送http请求 */
                     }
                 },
-                expiryTime
+                expiryTime /* */
         );
     }
 

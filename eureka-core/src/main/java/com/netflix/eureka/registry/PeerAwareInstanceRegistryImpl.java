@@ -98,7 +98,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     private long startupTime = 0;
     private boolean peerInstancesTransferEmptyOnStartup = true;
 
-    public enum Action {
+    public enum Action { /* 同步操作类型， 由PeerAwareInstanceRegistryImpl重载各个AbstractInstanceRegistry方法实现 */
         Heartbeat, Register, Cancel, StatusUpdate, DeleteStatusOverride;
 
         private com.netflix.servo.monitor.Timer timer = Monitors.newTimer(this.name());
@@ -114,10 +114,10 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
         }
     };
 
-    private final MeasuredRate numberOfReplicationsLastMin;
+    private final MeasuredRate numberOfReplicationsLastMin; /* metric统计：过去一分钟的集群同步操作count */
 
     protected final EurekaClient eurekaClient;
-    protected volatile PeerEurekaNodes peerEurekaNodes;
+    protected volatile PeerEurekaNodes peerEurekaNodes; /* 集群节点 */
 
     private final InstanceStatusOverrideRule instanceStatusOverrideRule;
 
@@ -201,7 +201,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
     /**
      * Populates the registry information from a peer eureka node. This
      * operation fails over to other nodes until the list is exhausted if the
-     * communication fails.
+     * communication fails. sever启动时，从集群节点拉取注册信息
      */
     @Override
     public int syncUp() {
@@ -401,7 +401,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
             leaseDuration = info.getLeaseInfo().getDurationInSecs();
         }
         super.register(info, leaseDuration, isReplication);
-        replicateToPeers(Action.Register, info.getAppName(), info.getId(), info, null, isReplication);
+        replicateToPeers(Action.Register, info.getAppName(), info.getId(), info, null, isReplication); /* */
     }
 
     /*
@@ -412,7 +412,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
      */
     public boolean renew(final String appName, final String id, final boolean isReplication) {
         if (super.renew(appName, id, isReplication)) {
-            replicateToPeers(Action.Heartbeat, appName, id, null, null, isReplication);
+            replicateToPeers(Action.Heartbeat, appName, id, null, null, isReplication); /* 同步给集群其他节点 */
             return true;
         }
         return false;
@@ -605,7 +605,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
 
     /**
      * Replicates all eureka actions to peer eureka nodes except for replication
-     * traffic to this node.
+     * traffic to this node.  集群复制：所有动作的复制，都走这个接口
      *
      */
     private void replicateToPeers(Action action, String appName, String id,
@@ -614,19 +614,19 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
         Stopwatch tracer = action.getTimer().start();
         try {
             if (isReplication) {
-                numberOfReplicationsLastMin.increment();
+                numberOfReplicationsLastMin.increment(); /* metric统计：过去一分钟的集群同步操作count */
             }
             // If it is a replication already, do not replicate again as this will create a poison replication
-            if (peerEurekaNodes == Collections.EMPTY_LIST || isReplication) {
+            if (peerEurekaNodes == Collections.EMPTY_LIST || isReplication) { /* 没有peer || 本身就是peer传递过来的，不需要继续广播 */
                 return;
             }
 
             for (final PeerEurekaNode node : peerEurekaNodes.getPeerEurekaNodes()) {
-                // If the url represents this host, do not replicate to yourself.
+                // If the url represents this host, do not replicate to yourself. 排除自己
                 if (peerEurekaNodes.isThisMyUrl(node.getServiceUrl())) {
                     continue;
                 }
-                replicateInstanceActionsToPeers(action, appName, id, info, newStatus, node);
+                replicateInstanceActionsToPeers(action, appName, id, info, newStatus, node); /* 复制实例动作到peer*/
             }
         } finally {
             tracer.stop();
@@ -644,7 +644,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
         try {
             InstanceInfo infoFromRegistry;
             CurrentRequestVersion.set(Version.V2);
-            switch (action) {
+            switch (action) {  /* 按action类型，构建task投递到队列中， 套路都类似 */
                 case Cancel:
                     node.cancel(appName, id);
                     break;

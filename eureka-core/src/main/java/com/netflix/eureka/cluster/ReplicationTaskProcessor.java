@@ -77,7 +77,7 @@ class ReplicationTaskProcessor implements TaskProcessor<ReplicationTask> {
     public ProcessingResult process(List<ReplicationTask> tasks) {
         ReplicationList list = createReplicationListOf(tasks);
         try {
-            EurekaHttpResponse<ReplicationListResponse> response = replicationClient.submitBatchUpdates(list);
+            EurekaHttpResponse<ReplicationListResponse> response = replicationClient.submitBatchUpdates(list); /* http 批量处理*/
             int statusCode = response.getStatusCode();
             if (!isSuccess(statusCode)) {
                 if (statusCode == 503) {
@@ -133,7 +133,7 @@ class ReplicationTaskProcessor implements TaskProcessor<ReplicationTask> {
             logger.error("Batch response size different from submitted task list ({} != {}); skipping response analysis", responseList.size(), tasks.size());
             return;
         }
-        for (int i = 0; i < tasks.size(); i++) {
+        for (int i = 0; i < tasks.size(); i++) { /* for一下 */
             handleBatchResponse(tasks.get(i), responseList.get(i));
         }
     }
@@ -141,12 +141,12 @@ class ReplicationTaskProcessor implements TaskProcessor<ReplicationTask> {
     private void handleBatchResponse(ReplicationTask task, ReplicationInstanceResponse response) {
         int statusCode = response.getStatusCode();
         if (isSuccess(statusCode)) {
-            task.handleSuccess();
+            task.handleSuccess(); /* task成功回调 */
             return;
         }
 
         try {
-            task.handleFailure(response.getStatusCode(), response.getResponseEntity());
+            task.handleFailure(response.getStatusCode(), response.getResponseEntity());  /* task失败回调 */
         } catch (Throwable e) {
             logger.error("Replication task {} error handler failure", task.getTaskName(), e);
         }

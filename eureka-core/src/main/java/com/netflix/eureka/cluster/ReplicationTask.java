@@ -12,8 +12,8 @@ abstract class ReplicationTask {
 
     private static final Logger logger = LoggerFactory.getLogger(ReplicationTask.class);
 
-    protected final String peerNodeName;
-    protected final Action action;
+    protected final String peerNodeName;  /* 目标peer */
+    protected final Action action; /* 待同步动作 */
 
     ReplicationTask(String peerNodeName, Action action) {
         this.peerNodeName = peerNodeName;

@@ -56,7 +56,7 @@ public class DefaultEurekaServerContext implements EurekaServerContext {
         this.serverConfig = serverConfig;
         this.serverCodecs = serverCodecs;
         this.registry = registry;
-        this.peerEurekaNodes = peerEurekaNodes;
+        this.peerEurekaNodes = peerEurekaNodes; /* 传入*/
         this.applicationInfoManager = applicationInfoManager;
     }
 

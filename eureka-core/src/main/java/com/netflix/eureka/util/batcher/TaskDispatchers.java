@@ -42,12 +42,12 @@ public class TaskDispatchers {
                                                                              TaskProcessor<T> taskProcessor) {
         final AcceptorExecutor<ID, T> acceptorExecutor = new AcceptorExecutor<>(
                 id, maxBufferSize, workloadSize, maxBatchingDelay, congestionRetryDelayMs, networkFailureRetryMs
-        );
-        final TaskExecutors<ID, T> taskExecutor = TaskExecutors.batchExecutors(id, workerCount, taskProcessor, acceptorExecutor);
-        return new TaskDispatcher<ID, T>() {
+        ); /* 接收执行器*/
+        final TaskExecutors<ID, T> taskExecutor = TaskExecutors.batchExecutors(id, workerCount, taskProcessor, acceptorExecutor); /* 任务执行器：持有 接收执行器 */
+        return new TaskDispatcher<ID, T>() { /* 组装： 任务分派器， 整个batcher包的外部入口 */
             @Override
             public void process(ID id, T task, long expiryTime) {
-                acceptorExecutor.process(id, task, expiryTime);
+                acceptorExecutor.process(id, task, expiryTime); /* 外部入口： 将task交给acceptorExecutor处理 */
             }
 
             @Override

@@ -34,7 +34,7 @@ class TaskExecutors<ID, T> {
     private static final Map<String, TaskExecutorMetrics> registeredMonitors = new HashMap<>();
 
     private final AtomicBoolean isShutdown;
-    private final List<Thread> workerThreads;
+    private final List<Thread> workerThreads; /* n个工作线程， n = workerCount */
 
     TaskExecutors(WorkerRunnableFactory<ID, T> workerRunnableFactory, int workerCount, AtomicBoolean isShutdown) {
         this.isShutdown = isShutdown;
@@ -42,11 +42,11 @@ class TaskExecutors<ID, T> {
 
         ThreadGroup threadGroup = new ThreadGroup("eurekaTaskExecutors");
         for (int i = 0; i < workerCount; i++) {
-            WorkerRunnable<ID, T> runnable = workerRunnableFactory.create(i);
+            WorkerRunnable<ID, T> runnable = workerRunnableFactory.create(i); /* 工作线程工厂 */
             Thread workerThread = new Thread(threadGroup, runnable, runnable.getWorkerName());
             workerThreads.add(workerThread);
             workerThread.setDaemon(true);
-            workerThread.start();
+            workerThread.start(); /* 启动了 */
         }
     }
 
@@ -141,16 +141,16 @@ class TaskExecutors<ID, T> {
         }
     }
 
-    interface WorkerRunnableFactory<ID, T> {
+    interface WorkerRunnableFactory<ID, T> { /* worker工厂*/
         WorkerRunnable<ID, T> create(int idx);
     }
 
-    abstract static class WorkerRunnable<ID, T> implements Runnable {
+    abstract static class WorkerRunnable<ID, T> implements Runnable { /* 做一个runable, 多了些成员， 也都是 WorkerRunnableFactory工厂给的*/
         final String workerName;
         final AtomicBoolean isShutdown;
         final TaskExecutorMetrics metrics;
-        final TaskProcessor<T> processor;
-        final AcceptorExecutor<ID, T> taskDispatcher;
+        final TaskProcessor<T> processor; /* 由客户代码实现 */
+        final AcceptorExecutor<ID, T> taskDispatcher; /* 接收处理器*/
 
         WorkerRunnable(String workerName,
                        AtomicBoolean isShutdown,
@@ -183,17 +183,17 @@ class TaskExecutors<ID, T> {
         public void run() {
             try {
                 while (!isShutdown.get()) {
-                    List<TaskHolder<ID, T>> holders = getWork();
+                    List<TaskHolder<ID, T>> holders = getWork(); /* 拿到若干任务*/
                     metrics.registerExpiryTimes(holders);
 
-                    List<T> tasks = getTasksOf(holders);
-                    ProcessingResult result = processor.process(tasks);
+                    List<T> tasks = getTasksOf(holders); /* 剥壳 */
+                    ProcessingResult result = processor.process(tasks); /* 处理任务， processor由客户代码提供 */
                     switch (result) {
                         case Success:
                             break;
-                        case Congestion:
+                        case Congestion: /* 拥塞*/
                         case TransientError:
-                            taskDispatcher.reprocess(holders, result);
+                            taskDispatcher.reprocess(holders, result); /* 要重新处理，由AcceptorExecutor<ID, T> taskDispatcher重新丢回队列*/
                             break;
                         case PermanentError:
                             logger.warn("Discarding {} tasks of {} due to permanent error", holders.size(), workerName);
@@ -209,7 +209,7 @@ class TaskExecutors<ID, T> {
         }
 
         private List<TaskHolder<ID, T>> getWork() throws InterruptedException {
-            BlockingQueue<List<TaskHolder<ID, T>>> workQueue = taskDispatcher.requestWorkItems();
+            BlockingQueue<List<TaskHolder<ID, T>>> workQueue = taskDispatcher.requestWorkItems(); /* 拿到若干任务 List<TaskHolder<ID, T>>*/
             List<TaskHolder<ID, T>> result;
             do {
                 result = workQueue.poll(1, TimeUnit.SECONDS);

@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Helper class to manage lifecycle of a collection of {@link PeerEurekaNode}s.
+ * Helper class to manage lifecycle of a collection of {@link PeerEurekaNode}s.  主要是在管理PeerEurekaNode的生命周期
  *
  * @author Tomasz Bak
  */
@@ -35,16 +35,16 @@ public class PeerEurekaNodes {
 
     private static final Logger logger = LoggerFactory.getLogger(PeerEurekaNodes.class);
 
-    protected final PeerAwareInstanceRegistry registry;
+    protected final PeerAwareInstanceRegistry registry; /* 本地注册表 */
     protected final EurekaServerConfig serverConfig;
     protected final EurekaClientConfig clientConfig;
     protected final ServerCodecs serverCodecs;
-    private final ApplicationInfoManager applicationInfoManager;
+    private final ApplicationInfoManager applicationInfoManager; /* 本地 配置管理器 */
 
-    private volatile List<PeerEurekaNode> peerEurekaNodes = Collections.emptyList();
-    private volatile Set<String> peerEurekaNodeUrls = Collections.emptySet();
+    private volatile List<PeerEurekaNode> peerEurekaNodes = Collections.emptyList(); /* 本地持有的集群节点 */
+    private volatile Set<String> peerEurekaNodeUrls = Collections.emptySet();  /* 本地持有的集群节点的url */
 
-    private ScheduledExecutorService taskExecutor;
+    private ScheduledExecutorService taskExecutor; /* 定时更新集群节点， 默认周期10min */
 
     @Inject
     public PeerEurekaNodes(
@@ -72,7 +72,7 @@ public class PeerEurekaNodes {
         return serverConfig.getHealthStatusMinNumberOfAvailablePeers();
     }
 
-    public void start() {
+    public void start() { /* 生命周期： 启动所有PeerEurekaNode */
         taskExecutor = Executors.newSingleThreadScheduledExecutor(
                 new ThreadFactory() {
                     @Override
@@ -84,8 +84,8 @@ public class PeerEurekaNodes {
                 }
         );
         try {
-            updatePeerEurekaNodes(resolvePeerUrls());
-            Runnable peersUpdateTask = new Runnable() {
+            updatePeerEurekaNodes(resolvePeerUrls());  /* 初始化集群节点信息： 根据本地的集群配置（netflix、springcloud都将配置做成的动态可配置），重构一下PeerEurekaNodes */
+            Runnable peersUpdateTask = new Runnable() { /* 初始化定时器：定时更新集群节点 */
                 @Override
                 public void run() {
                     try {
@@ -110,15 +110,15 @@ public class PeerEurekaNodes {
         }
     }
 
-    public void shutdown() {
-        taskExecutor.shutdown();
+    public void shutdown() { /* 生命周期： 停止所有PeerEurekaNode */
+        taskExecutor.shutdown(); /* 关闭定时器 */
         List<PeerEurekaNode> toRemove = this.peerEurekaNodes;
 
         this.peerEurekaNodes = Collections.emptyList();
         this.peerEurekaNodeUrls = Collections.emptySet();
 
         for (PeerEurekaNode node : toRemove) {
-            node.shutDown();
+            node.shutDown(); /* 挨个节点关闭 */
         }
     }
 
@@ -127,15 +127,15 @@ public class PeerEurekaNodes {
      *
      * @return peer URLs with node's own URL filtered out
      */
-    protected List<String> resolvePeerUrls() {
+    protected List<String> resolvePeerUrls() { /* 拿到集群节点连接 */
         InstanceInfo myInfo = applicationInfoManager.getInfo();
         String zone = InstanceInfo.getZone(clientConfig.getAvailabilityZones(clientConfig.getRegion()), myInfo);
         List<String> replicaUrls = EndpointUtils
-                .getDiscoveryServiceUrls(clientConfig, zone, new EndpointUtils.InstanceInfoBasedUrlRandomizer(myInfo));
+                .getDiscoveryServiceUrls(clientConfig, zone, new EndpointUtils.InstanceInfoBasedUrlRandomizer(myInfo)); /* 拿到集群配置，并解析 */
 
         int idx = 0;
         while (idx < replicaUrls.size()) {
-            if (isThisMyUrl(replicaUrls.get(idx))) {
+            if (isThisMyUrl(replicaUrls.get(idx))) { /* 排除自己 */
                 replicaUrls.remove(idx);
             } else {
                 idx++;
@@ -146,7 +146,7 @@ public class PeerEurekaNodes {
 
     /**
      * Given new set of replica URLs, destroy {@link PeerEurekaNode}s no longer available, and
-     * create new ones.
+     * create new ones 废旧立新
      *
      * @param newPeerUrls peer node URLs; this collection should have local node's URL filtered out
      */
@@ -195,7 +195,7 @@ public class PeerEurekaNodes {
     }
 
     protected PeerEurekaNode createPeerEurekaNode(String peerEurekaNodeUrl) {
-        HttpReplicationClient replicationClient = JerseyReplicationClient.createReplicationClient(serverConfig, serverCodecs, peerEurekaNodeUrl);
+        HttpReplicationClient replicationClient = JerseyReplicationClient.createReplicationClient(serverConfig, serverCodecs, peerEurekaNodeUrl); /**/
         String targetHost = hostFromUrl(peerEurekaNodeUrl);
         if (targetHost == null) {
             targetHost = "host";
