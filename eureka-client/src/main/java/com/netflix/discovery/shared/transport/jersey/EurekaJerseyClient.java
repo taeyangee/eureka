@@ -5,7 +5,7 @@ import com.sun.jersey.client.apache4.ApacheHttpClient4;
 /**
  * @author David Liu
  */
-public interface EurekaJerseyClient {
+public interface EurekaJerseyClient { /* 专门配合JerseyApplicationClient使用的*/
 
     ApacheHttpClient4 getClient();
 

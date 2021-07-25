@@ -56,7 +56,7 @@ public class JerseyReplicationClient extends AbstractJerseyEurekaHttpClient impl
 
     /**
      * Compared to regular heartbeat, in the replication channel the server may return a more up to date
-     * instance copy.
+     * instance copy.  和普通的心跳流有点区别, 可以从peer上把更新的实例信息带回来
      */
     @Override
     public EurekaHttpResponse<InstanceInfo> sendHeartBeat(String appName, String id, InstanceInfo info, InstanceStatus overriddenStatus) {

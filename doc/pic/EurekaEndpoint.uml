@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.netflix.discovery.shared.resolver.EurekaEndpoint</OriginalElement>
+  <nodes>
+    <node x="4.0" y="80.0">com.netflix.discovery.shared.resolver.EurekaEndpoint</node>
+    <node x="0.0" y="160.0">com.netflix.discovery.shared.resolver.DefaultEndpoint</node>
+    <node x="20.0" y="0.0">java.lang.Comparable</node>
+    <node x="16.0" y="240.0">com.netflix.discovery.shared.resolver.aws.AwsEndpoint</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.netflix.discovery.shared.resolver.aws.AwsEndpoint" target="com.netflix.discovery.shared.resolver.DefaultEndpoint">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.netflix.discovery.shared.resolver.DefaultEndpoint" target="com.netflix.discovery.shared.resolver.EurekaEndpoint">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.netflix.discovery.shared.resolver.EurekaEndpoint" target="java.lang.Comparable">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="84.0" y="136.5" />
+  <SelectedNodes>
+    <node>com.netflix.discovery.shared.resolver.EurekaEndpoint</node>
+  </SelectedNodes>
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+

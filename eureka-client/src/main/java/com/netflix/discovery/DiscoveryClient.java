@@ -165,7 +165,7 @@ public class DiscoveryClient implements EurekaClient {
     private final EndpointUtils.ServiceUrlRandomizer urlRandomizer;
     private final EndpointRandomizer endpointRandomizer;
     private final Provider<BackupRegistry> backupRegistryProvider;
-    private final EurekaTransport eurekaTransport;
+    private final EurekaTransport eurekaTransport; /* 通信组件*/
 
     private final AtomicReference<HealthCheckHandler> healthCheckHandlerRef = new AtomicReference<>();
     private volatile Map<String, Applications> remoteRegionVsApps = new ConcurrentHashMap<>();
@@ -193,14 +193,14 @@ public class DiscoveryClient implements EurekaClient {
 
     private final Stats stats = new Stats();
 
-    private static final class EurekaTransport {
+    private static final class EurekaTransport { /* 分成用于注册应用实例( registrationClient )和查询注册信息( newQueryClient )的两个不同网络通信客户端 */
         private ClosableResolver bootstrapResolver;
         private TransportClientFactory transportClientFactory;
 
-        private EurekaHttpClient registrationClient;
+        private EurekaHttpClient registrationClient; /* 注册用 */
         private EurekaHttpClientFactory registrationClientFactory;
 
-        private EurekaHttpClient queryClient;
+        private EurekaHttpClient queryClient; /* 查询注册用*/
         private EurekaHttpClientFactory queryClientFactory;
 
         void shutdown() {
@@ -418,7 +418,7 @@ public class DiscoveryClient implements EurekaClient {
                             .build()
             );  // use direct handoff
 
-            eurekaTransport = new EurekaTransport();
+            eurekaTransport = new EurekaTransport(); /* 通信组件： 简单EurekaHttpClient */
             scheduleServerEndpointTask(eurekaTransport, args);
 
             AzToRegionMapper azToRegionMapper;
@@ -522,7 +522,7 @@ public class DiscoveryClient implements EurekaClient {
                 ? Optional.empty()
                 : args.getHostnameVerifier();
 
-        // If the transport factory was not supplied with args, assume they are using jersey 1 for passivity
+        // If the transport factory was not supplied with args, assume they are using jersey 1 for passivity 构建client工厂
         eurekaTransport.transportClientFactory = providedJerseyClient == null
                 ? transportClientFactories.newTransportClientFactory(clientConfig, additionalFilters, applicationInfoManager.getInfo(), sslContext, hostnameVerifier)
                 : transportClientFactories.newTransportClientFactory(additionalFilters, providedJerseyClient);
@@ -551,7 +551,7 @@ public class DiscoveryClient implements EurekaClient {
                 endpointRandomizer
         );
 
-        if (clientConfig.shouldRegisterWithEureka()) {
+        if (clientConfig.shouldRegisterWithEureka()) {  /* 初始化 注册用client*/
             EurekaHttpClientFactory newRegistrationClientFactory = null;
             EurekaHttpClient newRegistrationClient = null;
             try {
@@ -570,7 +570,7 @@ public class DiscoveryClient implements EurekaClient {
 
         // new method (resolve from primary servers for read)
         // Configure new transport layer (candidate for injecting in the future)
-        if (clientConfig.shouldFetchRegistry()) {
+        if (clientConfig.shouldFetchRegistry()) {  /* 初始化 查询注册用client*/
             EurekaHttpClientFactory newQueryClientFactory = null;
             EurekaHttpClient newQueryClient = null;
             try {

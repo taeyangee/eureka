@@ -16,7 +16,7 @@
 
 package com.netflix.discovery.shared.resolver;
 
-public interface EurekaEndpoint extends Comparable<Object> {
+public interface EurekaEndpoint extends Comparable<Object> { /* 服务端点:例如，Eureka-Server 的访问地址。*/
 
     String getServiceUrl();
 

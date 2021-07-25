@@ -55,7 +55,7 @@ public class SessionedEurekaHttpClient extends EurekaHttpClientDecorator {
         this.name = name;
         this.clientFactory = clientFactory;
         this.sessionDurationMs = sessionDurationMs;
-        this.currentSessionDurationMs = randomizeSessionDuration(sessionDurationMs);
+        this.currentSessionDurationMs = randomizeSessionDuration(sessionDurationMs); /* session时长 随机生成 */
         Monitors.registerObject(name, this);
     }
 
@@ -63,15 +63,15 @@ public class SessionedEurekaHttpClient extends EurekaHttpClientDecorator {
     protected <R> EurekaHttpResponse<R> execute(RequestExecutor<R> requestExecutor) {
         long now = System.currentTimeMillis();
         long delay = now - lastReconnectTimeStamp;
-        if (delay >= currentSessionDurationMs) {
+        if (delay >= currentSessionDurationMs) { /* session 到期 */
             logger.debug("Ending a session and starting anew");
             lastReconnectTimeStamp = now;
-            currentSessionDurationMs = randomizeSessionDuration(sessionDurationMs);
-            TransportUtils.shutdown(eurekaHttpClientRef.getAndSet(null));
+            currentSessionDurationMs = randomizeSessionDuration(sessionDurationMs); /* session时长 随机生成 */
+            TransportUtils.shutdown(eurekaHttpClientRef.getAndSet(null)); /* 关掉client*/
         }
 
         EurekaHttpClient eurekaHttpClient = eurekaHttpClientRef.get();
-        if (eurekaHttpClient == null) {
+        if (eurekaHttpClient == null) { /* 没有， 就生成新的eurekaHttpClient */
             eurekaHttpClient = TransportUtils.getOrSetAnotherClient(eurekaHttpClientRef, clientFactory.newClient());
         }
         return requestExecutor.execute(eurekaHttpClient);

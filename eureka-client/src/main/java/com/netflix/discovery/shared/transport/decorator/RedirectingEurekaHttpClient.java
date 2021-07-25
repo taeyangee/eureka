@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tomasz Bak
  */
-public class RedirectingEurekaHttpClient extends EurekaHttpClientDecorator {
+public class RedirectingEurekaHttpClient extends EurekaHttpClientDecorator { /* 寻找非302重定向的 Eureka-Server 的 EurekaHttpClient */
 
     private static final Logger logger = LoggerFactory.getLogger(RedirectingEurekaHttpClient.class);
 
@@ -73,7 +73,7 @@ public class RedirectingEurekaHttpClient extends EurekaHttpClientDecorator {
     @Override
     protected <R> EurekaHttpResponse<R> execute(RequestExecutor<R> requestExecutor) {
         EurekaHttpClient currentEurekaClient = delegateRef.get();
-        if (currentEurekaClient == null) {
+        if (currentEurekaClient == null) { /* 尝试从 */
             AtomicReference<EurekaHttpClient> currentEurekaClientRef = new AtomicReference<>(factory.newClient(serviceEndpoint));
             try {
                 EurekaHttpResponse<R> response = executeOnNewServer(requestExecutor, currentEurekaClientRef);

@@ -65,11 +65,11 @@ public class RetryableEurekaHttpClient extends EurekaHttpClientDecorator {
     private final ClusterResolver clusterResolver;
     private final TransportClientFactory clientFactory;
     private final ServerStatusEvaluator serverStatusEvaluator;
-    private final int numberOfRetries;
+    private final int numberOfRetries; /* 重试次数 */
 
-    private final AtomicReference<EurekaHttpClient> delegate = new AtomicReference<>();
+    private final AtomicReference<EurekaHttpClient> delegate = new AtomicReference<>(); /* 被代理的EurekaHttpClient */
 
-    private final Set<EurekaEndpoint> quarantineSet = new ConcurrentSkipListSet<>();
+    private final Set<EurekaEndpoint> quarantineSet = new ConcurrentSkipListSet<>(); /* 隔离区： 隔离故障端点 */
 
     public RetryableEurekaHttpClient(String name,
                                      EurekaTransportConfig transportConfig,
@@ -99,9 +99,9 @@ public class RetryableEurekaHttpClient extends EurekaHttpClientDecorator {
         List<EurekaEndpoint> candidateHosts = null;
         int endpointIdx = 0;
         for (int retry = 0; retry < numberOfRetries; retry++) {
-            EurekaHttpClient currentHttpClient = delegate.get();
+            EurekaHttpClient currentHttpClient = delegate.get(); /* 拿到被代理对象持有的currentHttpClient*/
             EurekaEndpoint currentEndpoint = null;
-            if (currentHttpClient == null) {
+            if (currentHttpClient == null) { /* 没有就构建一个给代理， retry也会走进这个分支 */
                 if (candidateHosts == null) {
                     candidateHosts = getHostCandidates();
                     if (candidateHosts.isEmpty()) {
@@ -112,18 +112,18 @@ public class RetryableEurekaHttpClient extends EurekaHttpClientDecorator {
                     throw new TransportException("Cannot execute request on any known server");
                 }
 
-                currentEndpoint = candidateHosts.get(endpointIdx++);
-                currentHttpClient = clientFactory.newClient(currentEndpoint);
+                currentEndpoint = candidateHosts.get(endpointIdx++); /* 准则一个候选端点*/
+                currentHttpClient = clientFactory.newClient(currentEndpoint); /* 构建httpclient */
             }
 
             try {
-                EurekaHttpResponse<R> response = requestExecutor.execute(currentHttpClient);
-                if (serverStatusEvaluator.accept(response.getStatusCode(), requestExecutor.getRequestType())) {
+                EurekaHttpResponse<R> response = requestExecutor.execute(currentHttpClient); /* 执行请求 */
+                if (serverStatusEvaluator.accept(response.getStatusCode(), requestExecutor.getRequestType())) { /* 执行结果判定 */
                     delegate.set(currentHttpClient);
                     if (retry > 0) {
                         logger.info("Request execution succeeded on retry #{}", retry);
                     }
-                    return response;
+                    return response; /* 请求成功， 退出for*/
                 }
                 logger.warn("Request execution failure with status code {}; retrying on another server if available", response.getStatusCode());
             } catch (Exception e) {
@@ -131,9 +131,9 @@ public class RetryableEurekaHttpClient extends EurekaHttpClientDecorator {
             }
 
             // Connection error or 5xx from the server that must be retried on another server
-            delegate.compareAndSet(currentHttpClient, null);
+            delegate.compareAndSet(currentHttpClient, null); /* currentHttpClient 不可用啊， 换一个 */
             if (currentEndpoint != null) {
-                quarantineSet.add(currentEndpoint);
+                quarantineSet.add(currentEndpoint); /* currentHttpClient 进入隔离区 */
             }
         }
         throw new TransportException("Retry limit reached; giving up on completing the request");

@@ -77,7 +77,7 @@ public final class EurekaHttpClients {
 
         return new EurekaHttpClientFactory() {
             @Override
-            public EurekaHttpClient newClient() {
+            public EurekaHttpClient newClient() { /* 包装器： session > Retryable > RedirectingEurekaHttpClient*/
                 return new SessionedEurekaHttpClient(
                         name,
                         RetryableEurekaHttpClient.createFactory(
