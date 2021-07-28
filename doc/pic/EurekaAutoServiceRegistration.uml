@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.springframework.cloud.netflix.eureka.serviceregistry.EurekaAutoServiceRegistration</OriginalElement>
+  <nodes>
+    <node x="236.70833333333331" y="0.0">org.springframework.context.ApplicationEvent</node>
+    <node x="432.7083333333333" y="0.0">java.lang.FunctionalInterface</node>
+    <node x="324.7083333333333" y="240.0">org.springframework.cloud.netflix.eureka.serviceregistry.EurekaAutoServiceRegistration</node>
+    <node x="652.7083333333333" y="0.0">java.util.EventListener</node>
+    <node x="661.9583333333333" y="80.0">org.springframework.core.Ordered</node>
+    <node x="472.7083333333333" y="160.0">org.springframework.context.event.SmartApplicationListener</node>
+    <node x="220.70833333333331" y="160.0">org.springframework.cloud.client.serviceregistry.AutoServiceRegistration</node>
+    <node x="140.0" y="80.0">org.springframework.context.Phased</node>
+    <node x="432.7083333333333" y="80.0">org.springframework.context.ApplicationListener</node>
+    <node x="0.0" y="80.0">org.springframework.context.Lifecycle</node>
+    <node x="40.708333333333314" y="160.0">org.springframework.context.SmartLifecycle</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.springframework.context.ApplicationListener" target="org.springframework.context.ApplicationEvent">
+      <point x="-66.66666666666669" y="-15.0" />
+      <point x="466.04166666666663" y="55.0" />
+      <point x="324.7083333333333" y="55.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.cloud.netflix.eureka.serviceregistry.EurekaAutoServiceRegistration" target="org.springframework.context.SmartLifecycle">
+      <point x="-105.0" y="-15.0" />
+      <point x="359.7083333333333" y="220.0" />
+      <point x="120.70833333333331" y="220.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.context.ApplicationListener" target="java.lang.FunctionalInterface">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.context.SmartLifecycle" target="org.springframework.context.Phased">
+      <point x="40.0" y="-15.0" />
+      <point x="160.70833333333331" y="135.0" />
+      <point x="188.0" y="135.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.context.event.SmartApplicationListener" target="org.springframework.context.ApplicationListener">
+      <point x="-60.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.context.ApplicationListener" target="java.util.EventListener">
+      <point x="66.66666666666669" y="-15.0" />
+      <point x="599.375" y="55.0" />
+      <point x="728.7083333333333" y="55.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.context.SmartLifecycle" target="org.springframework.context.Lifecycle">
+      <point x="-40.0" y="-15.0" />
+      <point x="80.70833333333331" y="135.0" />
+      <point x="60.0" y="135.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.cloud.netflix.eureka.serviceregistry.EurekaAutoServiceRegistration" target="org.springframework.context.event.SmartApplicationListener">
+      <point x="35.0" y="-15.0" />
+      <point x="499.7083333333333" y="210.0" />
+      <point x="592.7083333333333" y="210.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.cloud.netflix.eureka.serviceregistry.EurekaAutoServiceRegistration" target="org.springframework.core.Ordered">
+      <point x="105.0" y="-15.0" />
+      <point x="569.7083333333333" y="220.0" />
+      <point x="739.9583333333333" y="220.0" />
+      <point x="26.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.context.event.SmartApplicationListener" target="org.springframework.core.Ordered">
+      <point x="60.0" y="-15.0" />
+      <point x="652.7083333333333" y="135.0" />
+      <point x="687.9583333333333" y="135.0" />
+      <point x="-26.0" y="15.0" />
+    </edge>
+    <edge source="org.springframework.cloud.netflix.eureka.serviceregistry.EurekaAutoServiceRegistration" target="org.springframework.cloud.client.serviceregistry.AutoServiceRegistration">
+      <point x="-35.0" y="-15.0" />
+      <point x="429.7083333333333" y="210.0" />
+      <point x="336.7083333333333" y="210.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="470.5" y="135.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
