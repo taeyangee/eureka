@@ -437,7 +437,7 @@ public class DiscoveryClient implements EurekaClient {
 
         if (clientConfig.shouldFetchRegistry()) {
             try {
-                boolean primaryFetchRegistryResult = fetchRegistry(false);
+                boolean primaryFetchRegistryResult = fetchRegistry(false); /* 拉取注册信息*/
                 if (!primaryFetchRegistryResult) {
                     logger.info("Initial registry fetch from primary servers failed");
                 }

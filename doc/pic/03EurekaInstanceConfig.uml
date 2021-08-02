@@ -3,8 +3,8 @@
   <ID>JAVA</ID>
   <OriginalElement>com.netflix.appinfo.MyDataCenterInstanceConfig</OriginalElement>
   <nodes>
-    <node x="53.52380952380952" y="160.0">com.netflix.appinfo.PropertiesInstanceConfig</node>
     <node x="130.1071428571429" y="0.0">com.netflix.appinfo.EurekaInstanceConfig</node>
+    <node x="53.52380952380952" y="160.0">com.netflix.appinfo.PropertiesInstanceConfig</node>
     <node x="112.02380952380952" y="240.0">com.netflix.appinfo.MyDataCenterInstanceConfig</node>
     <node x="0.0" y="80.0">com.netflix.appinfo.AbstractInstanceConfig</node>
   </nodes>
